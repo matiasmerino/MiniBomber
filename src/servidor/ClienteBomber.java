@@ -27,7 +27,7 @@ public class ClienteBomber{
 	
 	public boolean registrarse(String datos){
 		try {
-			new DataOutputStream(cliente.getOutputStream()).writeUTF(datos);
+			new DataOutputStream(cliente.getOutputStream()).writeUTF("menu-"+datos);
 			return new DataInputStream(cliente.getInputStream()).readBoolean();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -37,7 +37,7 @@ public class ClienteBomber{
 	
 	public boolean validarLogin(String login){
 		try {
-			new DataOutputStream(cliente.getOutputStream()).writeUTF(login);
+			new DataOutputStream(cliente.getOutputStream()).writeUTF("menu-"+login);
 			return new DataInputStream(cliente.getInputStream()).readBoolean();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -48,7 +48,7 @@ public class ClienteBomber{
 	public void actualizaDatos(String datos){
 		
 		try {
-			new DataOutputStream(cliente.getOutputStream()).writeUTF(datos);
+			new DataOutputStream(cliente.getOutputStream()).writeUTF("menu-"+datos);
 //			return new DataInputStream(cliente.getInputStream()).readBoolean();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -59,7 +59,7 @@ public class ClienteBomber{
 	public String getDato(String datos){
 		String dato = null;
 		try {
-			new DataOutputStream(cliente.getOutputStream()).writeUTF(datos);
+			new DataOutputStream(cliente.getOutputStream()).writeUTF("menu-"+datos);
 			return dato = new DataInputStream(cliente.getInputStream()).readUTF();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -70,7 +70,7 @@ public class ClienteBomber{
 	public Object[][] puntuacionesMax(String dato) {
 		Object[][] datos = null;
 		try {
-			new DataOutputStream(cliente.getOutputStream()).writeUTF(dato);
+			new DataOutputStream(cliente.getOutputStream()).writeUTF("menu-" +dato);
 			return datos = (Object[][]) new ObjectInputStream(cliente.getInputStream()).readObject();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -79,7 +79,7 @@ public class ClienteBomber{
 	}
 
 	public void nuevaPartida(int cantJugadores) {
-		String datos = "nueva"+Login.split+cantJugadores;
+		String datos = "menu-nueva"+Login.split+cantJugadores;
 		try {
 			new DataOutputStream(cliente.getOutputStream()).writeUTF(datos);
 			if (new DataInputStream(cliente.getInputStream()).readBoolean())
@@ -92,7 +92,7 @@ public class ClienteBomber{
 	}
 	
 	public void unirPartida(int numPartida) {
-		String datos = "unir"+Login.split+numPartida;
+		String datos = "menu-unir"+Login.split+numPartida;
 		String[] texto = null;
 		try {
 			new DataOutputStream(cliente.getOutputStream()).writeUTF(datos);
@@ -109,7 +109,7 @@ public class ClienteBomber{
 	public Object[] consultarPartidas(){	
 		Object[] partidas = null;
 		try {
-			new DataOutputStream(cliente.getOutputStream()).writeUTF("partidas");
+			new DataOutputStream(cliente.getOutputStream()).writeUTF("menu-partidas");
 			return partidas = (Object[]) new ObjectInputStream(cliente.getInputStream()).readObject();
 		} catch (Exception e) {
 			e.printStackTrace();

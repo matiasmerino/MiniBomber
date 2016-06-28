@@ -121,5 +121,9 @@ public class Juego extends JPanel{
 //		
 //		}
 //	}
+	
+	public Jugador getJugador(int n){
+		return jugadores[n];
+	}
 
 }

@@ -16,7 +16,7 @@ public class MySQLConnection {
 			if(conn == null) {	
 				String driver="com.mysql.jdbc.Driver"; //el driver varia segun la BD que usemos
 				String url="jdbc:mysql://localhost/bomberman";
-				String pwd="root";
+				String pwd="1234";
 				String usr="root";
 				Class.forName(driver);
 				conn = DriverManager.getConnection(url,usr,pwd);

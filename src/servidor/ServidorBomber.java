@@ -4,10 +4,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import enumeraciones.EstadoJuego;
+
 public class ServidorBomber {
 	
 	public static final int PUERTO = 5000;
-	public static final String IP = "localhost";
+	public static final String IP = "192.168.1.105";
 	private ArrayList<Socket> sockets;
 	private ArrayList<Partida> partidas = new ArrayList<Partida>();
 	private DBBomber db = new DBBomber();
@@ -44,7 +46,6 @@ public class ServidorBomber {
 	public static void main(String[] args) {
 		new ServidorBomber(PUERTO);
 	}
-	
 
 	
 }

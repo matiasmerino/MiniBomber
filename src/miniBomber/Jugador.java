@@ -9,6 +9,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 
 import pantallas.Login;
+import servidor.ClienteHiloBomber;
 
 public class Jugador extends Thread{
 
@@ -17,14 +18,11 @@ public class Jugador extends Thread{
 	private static final int ABAJO = 1;
 	private static final int IZQ = 2;
 	private static final int DER = 3;
-	private static final int MUERTE = 4;
 	private int state = 1;
 	private int frame = 1;
 	private int velocidadSprite = 5;
 	private int x = 0;
 	private int y = 0;
-	private int xa = 0;
-	private int ya = 0;
 	private int ultimaTecla = 0;
 	private int contador = 0;
 	private int puntos = 0;
@@ -40,6 +38,7 @@ public class Jugador extends Thread{
 //	private int[] estados = {0,1,2,3,4};
 	private Toolkit tk = Toolkit.getDefaultToolkit();
 	private String path = new String();
+	private ClienteHiloBomber cliente = null;
     {
     try { 	
         for (int i = 0; i < 4; i++) {
@@ -182,16 +181,18 @@ public class Jugador extends Thread{
 	
 	public void keyPressed(KeyEvent e) {
 		
+		if(cliente == null)
+			throw new RuntimeException("el cliente debe estar preciamente seteado");
 		switch(e.getKeyCode()){
-		case KeyEvent.VK_LEFT: 	ultimaTecla = KeyEvent.VK_LEFT;
+		case KeyEvent.VK_LEFT: 	cliente.moverIzquierda();
 								break;
-		case KeyEvent.VK_RIGHT:	ultimaTecla = KeyEvent.VK_RIGHT;
+		case KeyEvent.VK_RIGHT:	cliente.moverDerecha();
 								break;
-		case KeyEvent.VK_UP:	ultimaTecla = KeyEvent.VK_UP;
+		case KeyEvent.VK_UP:	cliente.moverArriba();
 								break;
-		case KeyEvent.VK_DOWN:	ultimaTecla = KeyEvent.VK_DOWN;
+		case KeyEvent.VK_DOWN:	cliente.moverAbajo();
 								break;
-		case KeyEvent.VK_X:		ultimaTecla = KeyEvent.VK_X;
+		case KeyEvent.VK_X:		cliente.tirarBomba();
 		}
 		
 		
@@ -219,6 +220,10 @@ public class Jugador extends Thread{
 //									mapa.mapa[(y-Mapa.DIMENSION)/Mapa.DIMENSION][(x+Mapa.DIMENSION/2)/Mapa.DIMENSION] = Mapa.BOMBA;
 //								}
 //		}
+	}
+	
+	public void setCliente(ClienteHiloBomber cliente){
+		this.cliente = cliente;
 	}
 
 
