@@ -5,55 +5,76 @@ import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Toolkit;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Random;
-import java.util.Vector;
 
 import javax.swing.JPanel;
 
 import com.google.gson.Gson;
 
-import pantallas.Login;
-
 
 @SuppressWarnings("serial")
 public class Mapa extends JPanel{
-
+	/** Medidas **/
 	public static final int DIMENSION = 32;
 	public static final int ANCHOMAPA = 31;
 	public static final int ALTOMAPA = 13;
+	
+	/** Objetos en el mapa **/
 	public static final int VACIO = 0;
 	public static final int MURODURO = 1;
 	public static final int MUROBLANDO = 2;
-	public static final int BOMBA = 3;
-	public static final int P1 = -1;
-	public static final int P2 = -2;
-	public static final int P3 = -3;
-	public static final int P4 = -4;
-	/*** Fuego ***/
-	public static final int CENTRO = 0;
-	public static final int HORIZONTAL = 1;
-	public static final int VERTICAL = 2;
-	public static final int NORTE = 3;
-	public static final int SUR = 4;
-	public static final int ESTE = 5;
-	public static final int OESTE = 6;
-	public int mapa[][] = null;
-	public Bomba mapaBombas[][] = null;
-	public Vector<Bomba> bombas = null;
-//	private Vector items = null;
+	public static final int MUROFUEGO = 3;
+	public static final int BOMBA = 4;
 	
-	private static int x = 0;
-	private static int y = 0;
-	public static Juego juego;
+	/** Poderes **/
+	public static final int ITEM = 5;
+	public static final int MASBOMBA = -10;
+	public static final int MASFUEGO = -11;
+	
+	/*** Fuego ***/
+	public static final int CENTRO = -1;
+	public static final int HORIZONTAL = -2;
+	public static final int VERTICAL = -3;
+	public static final int NORTE = -4;
+	public static final int SUR = -5;
+	public static final int ESTE = -6;
+	public static final int OESTE = -7;
+	
+	public int mapa[][] = null;
+	private ArrayList<Bomba> bombas = new ArrayList<Bomba>();
+	private int velocidadSprite = 5;
+	private int contador = 0;
+	private int frame = 1;
+	private int x = 0;
+	private int y = 0;
 	private static Image[] imgMapa = new Image[3];
+	private static Image[] imgBomba = new Image[3];
+	private static Image[] imgItems = new Image[2];
+	private static Image[][] imgFuego = new Image[7][7];
 	private Toolkit tk = Toolkit.getDefaultToolkit();
 	private String path = new String();
 	{
 	    try {
-	        for (int i = 0; i < 3; i++) {
+	        for (int i = 0; i < imgMapa.length; i++) {
             	path = ".\\Imagenes\\Mapa\\" + (i + 1) + ".png";
-            	imgMapa[i] = tk.getImage(
-                new File(path).getCanonicalPath());
+            	imgMapa[i] = tk.getImage(new File(path).getCanonicalPath());
+            	
+            	path = ".\\Imagenes\\Bomba\\";
+                path +=  (i + 1) + ".png";
+                imgBomba[i] = tk.getImage(new File(path).getCanonicalPath());
+	        }
+	        for (int i = 0; i < imgItems.length; i++) {
+	        	path = ".\\Imagenes\\Items\\" + i + ".png";
+            	imgItems[i] = tk.getImage(new File(path).getCanonicalPath());
+	        }	        
+	        for (int i = 0; i < imgFuego.length; i++) {
+	            for (int j = 0; j < imgFuego.length; j++) {
+	            	path = ".\\Imagenes\\Fuego\\";
+	                path += i + "" + (j + 1) + ".png";
+	                imgFuego[i][j] = tk.getImage(
+	                new File(path).getCanonicalPath());
+	            }
 	        }
 	    }
 	    catch (Exception e) { new Error(e); }
@@ -65,17 +86,27 @@ public class Mapa extends JPanel{
 		try
         {
             int contador = 0;
-            for (int i = 0; i < 3; i++)
-                if (imgMapa[i] != null)
-                { tracker.addImage(imgMapa[i], contador++); }
+            for (int i = 0; i < 3; i++){
+                tracker.addImage(imgMapa[i], contador);
+                tracker.addImage(imgBomba[i], contador++);
+            }
+            contador = 0;
+            for (int i = 0; i < 2; i++){
+            	tracker.addImage(imgItems[i], contador++);
+            }
+            contador = 0;
+	        for (int i = 0; i < 7; i++) {
+	            for (int j = 0; j < 7; j++) {
+	            	 tracker.addImage(imgFuego[i][j], contador++);
+	                
+	            }
+	        }
      
             tracker.waitForAll();
         } catch (Exception e) { new Error(e); }
 		
-		bombas = new Vector<Bomba>();
-//		items = new Vector();
+		bombas = new ArrayList<Bomba>();
 		mapa = new int[ALTOMAPA][ANCHOMAPA];
-		mapaBombas = new Bomba[ALTOMAPA][ANCHOMAPA];
 		
 		/** Genera los muros duros y las posiciones vacias**/
 		for (int f = 0; f < ALTOMAPA; f++) 
@@ -85,7 +116,6 @@ public class Mapa extends JPanel{
 	            else if ( (f & 1) == 0 && (c & 1) == 0 ) 
 	            	mapa[f][c] = MURODURO;
 	            else mapa[f][c] = VACIO;
-	            mapaBombas[f][c] = null;
         }
 		
 		/** Genera los muros blandos**/
@@ -96,6 +126,15 @@ public class Mapa extends JPanel{
             y = r.nextInt(ANCHOMAPA);
             if (mapa[x][y] == VACIO)
             	mapa[x][y] = MUROBLANDO;
+        }
+        
+        /** Genera los items**/
+        for (int i = 0; i < 200; i++)
+        {
+            x = r.nextInt(ALTOMAPA);
+            y = r.nextInt(ANCHOMAPA);
+            if (mapa[x][y] == MUROBLANDO)
+            	mapa[x][y] = ITEM;
         }
         
         /** Vacía las esquinas para los jugadores **/
@@ -111,26 +150,84 @@ public class Mapa extends JPanel{
 //		}
 	}
 	
-	 public synchronized void paint(Graphics graf){
+	 public void paint(Graphics graf){
 		 Graphics g = graf;
-		 
+		 cambiarFrame();
 		 for (int f = 0; f < ALTOMAPA; f++)
 			for (int c = 0; c < ANCHOMAPA; c++){
-					if( mapa[f][c] == MUROBLANDO)
-						g.drawImage(imgMapa[2], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
-//					if( mapa[f][c] == MURODURO)
-//						g.drawImage(imgMapa[1], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
-//					if( mapa[f][c] == VACIO)
-//						g.drawImage(imgMapa[0], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
+					if( mapa[f][c] == MUROBLANDO || mapa[f][c] == ITEM)
+						g.drawImage(imgMapa[1], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
+					if( mapa[f][c] == MASBOMBA)
+						g.drawImage(imgItems[0], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
+					if( mapa[f][c] == MASFUEGO)
+						g.drawImage(imgItems[1], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
+					if( mapa[f][c] == BOMBA)
+						g.drawImage(imgBomba[frame], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
+					if( mapa[f][c] == CENTRO)
+						g.drawImage(imgFuego[0][frame], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
+					if( mapa[f][c] == VERTICAL)
+						g.drawImage(imgFuego[2][frame], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
+					if( mapa[f][c] == HORIZONTAL)
+						g.drawImage(imgFuego[1][frame], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
+					if( mapa[f][c] == NORTE)
+						g.drawImage(imgFuego[3][frame], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
+					if( mapa[f][c] == SUR)
+						g.drawImage(imgFuego[4][frame], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
+					if( mapa[f][c] == ESTE)
+						g.drawImage(imgFuego[5][frame], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
+					if( mapa[f][c] == OESTE)
+						g.drawImage(imgFuego[6][frame], c*DIMENSION, f*DIMENSION+48, DIMENSION, DIMENSION, null);
 					
 			}
 	 }
-	 public String getMapa(){
+	 
+	public void setValor(int x, int y, int v){
+		mapa[x][y] = v;
+	}
+	
+	public int getValor(int x, int y){
+		return mapa[x][y];
+	}
+	 
+	public String getMapa(){
 		Gson gson = new Gson();
-		return "mapa" +Login.split+ gson.toJson(mapa);
-	 }
-	 public void setValue(int x, int y, int v){
-		 mapa[x][y] = v;
-	 }
+		return gson.toJson(mapa);
+	}
+	
+	public void setMapa(int[][] mapa) {
+		this.mapa = mapa;
+	}
+	
+	public String getBombas(){
+		Gson gson = new Gson();
+		return gson.toJson(bombas);
+	}
+
+	public void posicionarBomba(Bomba bomba) {
+		bombas.add(bomba);
+		mapa[bomba.getX()][bomba.getY()] = BOMBA;
+	}
+
+	public void cambiarFrame(){
+		if(contador>velocidadSprite*3){
+			frame=1;
+			contador++;
+			if (contador==velocidadSprite*4)
+				contador=0;
+			}
+		else if(contador>velocidadSprite*2 && contador<=velocidadSprite*3){
+			frame=2;
+		    contador++;}
+		else if(contador>velocidadSprite && contador<=velocidadSprite*2){
+			frame=1;
+		    contador++;}
+		else{
+			frame=0;
+	    	contador++;}
+	}
+
+	public void quitarBomba(Bomba b) {
+		bombas.remove(b);		
+	}
 	
 }

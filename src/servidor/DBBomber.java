@@ -208,8 +208,41 @@ public class DBBomber {
 		prueba.desconectar();
 	}
 
+	public void actualizaPuntuacion(String usuario, int puntos) {
+		PreparedStatement pstmt = null;
 
-	
+		try {
+			pstmt = conn.prepareStatement("Update usuarios set puntosacum = puntosacum + ?, juegosjugados = juegosjugados+1 where usuario = ?");
+			pstmt.setLong(1, puntos);
+			pstmt.setString(2, usuario);
+			pstmt.executeUpdate();			
+		} catch(SQLException sqle) {
+			sqle.printStackTrace();
+		} finally {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}	
+	}
 
+	public void actualizaJuegosGanados(String usuario) {
+		PreparedStatement pstmt = null;
+
+		try {
+			pstmt = conn.prepareStatement("Update usuarios set juegosganados = juegosjugados+1 where usuario = ?");
+			pstmt.setString(1, usuario);
+			pstmt.executeUpdate();			
+		} catch(SQLException sqle) {
+			sqle.printStackTrace();
+		} finally {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}			
+	}
 	
 }

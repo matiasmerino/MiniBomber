@@ -1,26 +1,32 @@
 package servidor;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import enumeraciones.EstadoJuego;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 public class ServidorBomber {
 	
-	public static final int PUERTO = 5000;
-	public static final String IP = "192.168.1.105";
+	public static int PUERTO;
+	private static String path ="servidor.in";
 	private ArrayList<Socket> sockets;
 	private ArrayList<Partida> partidas = new ArrayList<Partida>();
 	private DBBomber db = new DBBomber();
+	private JFrame frame;
 	
-	public ServidorBomber(int puerto) {
-		
+	public ServidorBomber() {
+		leerArchivo();
+		cargarUI();
 		int i = 0;
 		sockets = new ArrayList<Socket>();
 		
 		try {
-			ServerSocket servidor = new ServerSocket(puerto);
+			ServerSocket servidor = new ServerSocket(PUERTO);
 			System.out.println("Servidor en Línea...");
 			
 			while(i < 100) {
@@ -35,6 +41,7 @@ public class ServidorBomber {
 						
 		} catch (Exception e) {
 			System.err.println("Ocurrió un problema con el Servidor");
+			System.out.println(e.getMessage());
 		}
 		
 		if(MySQLConnection.getConnection() == null){
@@ -44,76 +51,28 @@ public class ServidorBomber {
 	}
 
 	public static void main(String[] args) {
-		new ServidorBomber(PUERTO);
-	}
-
+		new ServidorBomber();
+	}	
 	
+	private void leerArchivo(){
+		try {
+			FileReader reader = new FileReader(path);
+			BufferedReader buffer = new BufferedReader(reader);
+			String linea = buffer.readLine();
+			PUERTO = Integer.parseInt(linea);
+			buffer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void cargarUI(){
+		frame = new JFrame();
+		frame.setTitle("servidor bomber");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.add(new JLabel("SERVIDOR CORRIENDO, CIERRE ESTA VENTANA PARA DETENER"));
+		frame.setVisible(true);
+		frame.setSize(400, 200);
+		frame.setLocationRelativeTo(null);
+	}
 }
-
-//public class ServidorBomber{
-//
-//	private static final int  PUERTO = 10000;
-//	private ArrayList<Socket> sockets = new ArrayList<Socket>();
-////	private ArrayList<Partida> partidas = new ArrayList<Partida>();
-//	ServerSocket servidor;
-//	DBBomber db = new DBBomber();
-//	
-//	
-//	public ServidorBomber(){
-//	
-//		try {
-//			servidor = new ServerSocket(PUERTO);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		start();
-//	}
-//	
-//	public void run(){
-//		int cont = 0;
-//		try {
-//			while(cont < 100){
-//				Socket cliente = servidor.accept();
-//				
-//				if(validarLogin(cliente)){
-//					sockets.add(cliente);
-//					new DataOutputStream(cliente.getOutputStream()).writeBoolean(true);
-//				}
-//				else
-//					new DataOutputStream(cliente.getOutputStream()).writeBoolean(false);
-//				cont++;
-//			}
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
-//	
-//	private boolean validarLogin(Socket cliente) {
-//		
-//		String login;
-//		try {
-//			login = new DataInputStream(cliente.getInputStream()).readUTF();	
-//			String[] datos = login.split(" ");
-//			return db.validarLogin(datos[0], datos[1]);
-//		} catch (Exception e) {
-//			System.out.println("Fallo login.");
-//		}
-//		return false;	 
-//	}
-//
-//	public void nuevaPartida(int cantJugadores){
-//		Partida partida = new Partida(cantJugadores, servidor);
-//		partidas.add(partida);
-//		new Thread(partida).start();
-//	}
-//		
-//	public static void main(String[] args) {
-//		
-//		new ServidorBomber();
-//		
-//
-//	}
-//	
-//	
-//	
-//}

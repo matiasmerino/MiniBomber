@@ -8,7 +8,7 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class Fondo extends JPanel {
 	String path = "/img/fondo.png";
-    /** Creates new form PnlFondo */
+
     public Fondo() {
         this.setSize(532, 448);
     }

@@ -62,7 +62,7 @@ public class TuPuntuacion extends Fondo {
 		gbc_lblPosicion.gridy = 4;
 		add(lblPosicion, gbc_lblPosicion);
 		
-		JLabel lblRank = new JLabel(principal.login.clienteBomber.getDato("getrank "+principal.login.getUsuario()));
+		JLabel lblRank = new JLabel(principal.login.clienteBomber.getDato("getrank"+Login.split+principal.login.getUsuario()));
 		lblRank.setFont(new Font("OCR A Extended", Font.BOLD, 18));
 		lblRank.setForeground(Color.WHITE);
 		GridBagConstraints gbc_lblRank = new GridBagConstraints();
@@ -82,7 +82,7 @@ public class TuPuntuacion extends Fondo {
 		gbc_lblJuegosGanados.gridy = 5;
 		add(lblJuegosGanados, gbc_lblJuegosGanados);
 		
-		JLabel lblGanados = new JLabel(principal.login.clienteBomber.getDato("getwins "+principal.login.getUsuario()+" juegosganados"));
+		JLabel lblGanados = new JLabel(principal.login.clienteBomber.getDato("getwins"+Login.split+principal.login.getUsuario()+Login.split+"juegosganados"));
 		lblGanados.setFont(new Font("OCR A Extended", Font.BOLD, 18));
 		lblGanados.setForeground(Color.WHITE);
 		GridBagConstraints gbc_lblGanados = new GridBagConstraints();
@@ -102,7 +102,7 @@ public class TuPuntuacion extends Fondo {
 		gbc_lblPuntosAcumulados.gridy = 6;
 		add(lblPuntosAcumulados, gbc_lblPuntosAcumulados);
 		
-		JLabel lblPuntosa = new JLabel(principal.login.clienteBomber.getDato("getacum "+principal.login.getUsuario()+" puntosacum"));
+		JLabel lblPuntosa = new JLabel(principal.login.clienteBomber.getDato("getacum"+Login.split+principal.login.getUsuario()+Login.split+"puntosacum"));
 		lblPuntosa.setFont(new Font("OCR A Extended", Font.BOLD, 18));
 		lblPuntosa.setForeground(Color.WHITE);
 		GridBagConstraints gbc_lblPuntosa = new GridBagConstraints();
@@ -138,7 +138,7 @@ public class TuPuntuacion extends Fondo {
 			}
 		});
 		
-		JLabel lblPuntosj = new JLabel(principal.login.clienteBomber.getDato("getppj "+principal.login.getUsuario()));
+		JLabel lblPuntosj = new JLabel(principal.login.clienteBomber.getDato("getppj"+Login.split+principal.login.getUsuario()));
 		lblPuntosj.setFont(new Font("OCR A Extended", Font.BOLD, 18));
 		lblPuntosj.setForeground(Color.WHITE);
 		GridBagConstraints gbc_lblPuntosj = new GridBagConstraints();

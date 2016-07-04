@@ -1,23 +1,40 @@
-package servidor;
+package cliente;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
-
 import pantallas.Login;
 
 
 public class ClienteBomber{
 	
-	private Socket cliente;
+	private static Socket cliente;
+	private int puerto;
+	private String path = "servidor.in";
+	private String ip;
 	
-	public ClienteBomber(int puerto, String ip) {
+	public ClienteBomber() {
 		try {
+			leerArchivo();
 			cliente = new Socket(ip, puerto);
-//			new ClienteHiloBomber(cliente).start();
 		} catch (IOException e) {
 			System.out.println("No se encuentra el servidor");
+		}
+	}
+	
+	private void leerArchivo(){
+		try {
+			FileReader reader = new FileReader(path);
+			BufferedReader buffer = new BufferedReader(reader);
+			String linea = buffer.readLine();
+			puerto = Integer.parseInt(linea);
+			ip = buffer.readLine();
+			buffer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -25,9 +42,28 @@ public class ClienteBomber{
 		return cliente;
 	}
 	
+	public static void enviar(String mensaje){
+		try {
+			new DataOutputStream(cliente.getOutputStream()).writeUTF(mensaje);
+		} catch(IOException excepcion) {
+			throw new RuntimeException("Error al enviar mensaje");
+		}
+	}
+	
+	public static String recibir(){
+		String mensaje = null;
+		try {
+			mensaje = new DataInputStream(cliente.getInputStream()).readUTF();
+		} catch (IOException excepcion) {
+			throw new RuntimeException("Error al recibir mensaje");
+		}
+		
+		return mensaje;
+	}
+	
 	public boolean registrarse(String datos){
 		try {
-			new DataOutputStream(cliente.getOutputStream()).writeUTF("menu-"+datos);
+			new DataOutputStream(cliente.getOutputStream()).writeUTF(datos);
 			return new DataInputStream(cliente.getInputStream()).readBoolean();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -37,7 +73,7 @@ public class ClienteBomber{
 	
 	public boolean validarLogin(String login){
 		try {
-			new DataOutputStream(cliente.getOutputStream()).writeUTF("menu-"+login);
+			new DataOutputStream(cliente.getOutputStream()).writeUTF(login);
 			return new DataInputStream(cliente.getInputStream()).readBoolean();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -48,7 +84,7 @@ public class ClienteBomber{
 	public void actualizaDatos(String datos){
 		
 		try {
-			new DataOutputStream(cliente.getOutputStream()).writeUTF("menu-"+datos);
+			new DataOutputStream(cliente.getOutputStream()).writeUTF(datos);
 //			return new DataInputStream(cliente.getInputStream()).readBoolean();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -59,7 +95,7 @@ public class ClienteBomber{
 	public String getDato(String datos){
 		String dato = null;
 		try {
-			new DataOutputStream(cliente.getOutputStream()).writeUTF("menu-"+datos);
+			new DataOutputStream(cliente.getOutputStream()).writeUTF(datos);
 			return dato = new DataInputStream(cliente.getInputStream()).readUTF();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -70,7 +106,7 @@ public class ClienteBomber{
 	public Object[][] puntuacionesMax(String dato) {
 		Object[][] datos = null;
 		try {
-			new DataOutputStream(cliente.getOutputStream()).writeUTF("menu-" +dato);
+			new DataOutputStream(cliente.getOutputStream()).writeUTF(dato);
 			return datos = (Object[][]) new ObjectInputStream(cliente.getInputStream()).readObject();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -79,7 +115,7 @@ public class ClienteBomber{
 	}
 
 	public void nuevaPartida(int cantJugadores) {
-		String datos = "menu-nueva"+Login.split+cantJugadores;
+		String datos = "nueva"+Login.split+cantJugadores;
 		try {
 			new DataOutputStream(cliente.getOutputStream()).writeUTF(datos);
 			if (new DataInputStream(cliente.getInputStream()).readBoolean())
@@ -92,7 +128,7 @@ public class ClienteBomber{
 	}
 	
 	public void unirPartida(int numPartida) {
-		String datos = "menu-unir"+Login.split+numPartida;
+		String datos = "unir"+Login.split+numPartida;
 		String[] texto = null;
 		try {
 			new DataOutputStream(cliente.getOutputStream()).writeUTF(datos);
@@ -109,20 +145,11 @@ public class ClienteBomber{
 	public Object[] consultarPartidas(){	
 		Object[] partidas = null;
 		try {
-			new DataOutputStream(cliente.getOutputStream()).writeUTF("menu-partidas");
+			new DataOutputStream(cliente.getOutputStream()).writeUTF("partidas");
 			return partidas = (Object[]) new ObjectInputStream(cliente.getInputStream()).readObject();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return partidas;
-	}
-	
-//	@Override
-//	public void run() {
-//		
-//	} 
-
-	
-	
-	
+	}	
 }

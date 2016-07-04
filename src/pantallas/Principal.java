@@ -22,7 +22,7 @@ public class Principal extends Fondo {
 	private static int MAX_PUNTUACIONES = 5;
 	Login login;
 	private JLabel lblUsuario;
-	Object[] opciones = {1, 2, 3, 4};
+	Object[] opciones = {2, 3, 4};
 	Object[] partidas = null;
 
 	private void siguientePanel(int a){

@@ -1,80 +1,126 @@
 package servidor;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import miniBomber.Bomba;
 import miniBomber.Juego;
 import miniBomber.Jugador;
 import miniBomber.Mapa;
+import pantallas.Login;
 
 public class Partida extends Thread{
 
 
 	public ArrayList<Socket> sockets = new ArrayList<Socket>();
-	public Mapa mapa = new Mapa();
 	public Juego juego;
 	private int cantJugadores;
+	private int cantJugadoresVivos;
 	private int numJugador = 1;
+	private int ganador = 0;
+	private boolean enCurso = false;
+	private String modificaciones = "";
 	ServerSocket servidor;
 	
 	
 	public Partida(Socket cliente, int cantJugadores){
-		
 		this.cantJugadores = cantJugadores;
+		this.cantJugadoresVivos = cantJugadores;
 		this.sockets.add(cliente);
 		start();
 	}
 	
-	@Override
 	public void run() {
 		while (numJugador < cantJugadores){
 			try {
-				sleep(100);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		} //Hasta que no estén todos los jugadores no empieza
+		enCurso = true;
+		juego = new Juego(cantJugadores, numJugador);	
 		
-		juego = new Juego(mapa, cantJugadores, numJugador);
-		int tecla = 0;
-		int i = 0;
 		try {
-			
-//			texto = new DataInputStream(cliente.getInputStream()).readUTF();
-//			String[] datos = texto.split(" ");
-			
-			while(true){//!juego.gameOver
-				
-
-				for( Socket indice : sockets){	
-					new DataOutputStream(indice.getOutputStream()).writeUTF(mapa.getMapa());
-					System.out.println("Mapa");
-					for ( Jugador jugador : juego.jugadores)
-						new DataOutputStream(indice.getOutputStream()).writeUTF(jugador.getEstado());
-				}
-				
-				for( Socket indice : sockets){
-					System.out.println("Estado");
-					tecla = new DataInputStream(indice.getInputStream()).readInt();
-					juego.jugadores[i].mover(tecla);
-					System.out.println(juego.jugadores[i].getEstado());
-				}
-					
-//				texto = new DataInputStream(indice.getInputStream()).readUTF();
-//				datos = texto.split(" ");
-			
-			}
+			for( Socket indice : sockets)
+				new DataOutputStream(indice.getOutputStream()).writeUTF("Comenzar");	
 		} catch (IOException e) {
-			e.printStackTrace();
+				e.printStackTrace();
 		}
 		
+		while (enCurso){
+			modificaciones = "";
+			
+			for( Jugador jugador : juego.jugadores ){
+				/** Revisamos si los jugadores agarraron algún item **/
+				if (juego.getMapa().getValor(jugador.xMapa(),jugador.yMapa()) == Mapa.MASBOMBA){
+					jugador.aumentaBombas();
+					juego.getMapa().setValor(jugador.xMapa(),jugador.yMapa(),Mapa.VACIO);
+				}
+				
+				if (juego.getMapa().getValor(jugador.xMapa(),jugador.yMapa()) == Mapa.MASFUEGO){
+					jugador.aumentaAlcance();
+					juego.getMapa().setValor(jugador.xMapa(),jugador.yMapa(),Mapa.VACIO);
+				}
+								
+				/** Revisamos si los jugadores son alcanzados por el fuego **/		
+				if (juego.getMapa().mapa[jugador.xMapa()][jugador.yMapa()] < 0 && jugador.estaVivo()){
+					jugador.morir();
+					cantJugadoresVivos--;
+				}
+
+				/** Dependiendo la tecla se mueve o deja una bomba **/
+				if ( jugador.getUltimaTecla() == Jugador.BOMBA )
+					jugador.dejarBomba();
+				else
+					jugador.mover();
+			}
+			
+			/** Preparo las modificaciones para enviar **/
+			modificaciones += "mod:"+ juego.getMapa().getMapa() +":";
+
+			for ( Jugador jugador : juego.jugadores)
+				modificaciones += jugador.getEstado();
+		
+			/** Envio las modificaciones a todos los clientes **/
+			try {
+				for( Socket indice : sockets)
+					new DataOutputStream(indice.getOutputStream()).writeUTF(modificaciones);	
+			} catch (IOException e) {
+					System.out.println("No se encuentra el cliente");
+			}
+			
+			/** Si queda uno o ninguno vivo termino la partida **/
+			System.out.println("Juga Vivos: " +cantJugadoresVivos);
+			if( cantJugadoresVivos <= 1){
+				enCurso=false;
+				for( Jugador jugador : juego.jugadores )
+					if(jugador.estaVivo())
+						ganador = jugador.getNumJugador();
+			}
+			
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		/** Les aviso a los clientes que terminó la partida y quien fue el ganador**/
+		try {
+			for( Socket indice : sockets){
+				new DataOutputStream(indice.getOutputStream()).writeUTF("gameover"+":"+ganador);
+			}
+		} catch (IOException e) {
+				System.out.println("No se encuentra el cliente");
+		}
 	}
 	
-	public String unirJugador(Socket cliente) throws IOException{ //devuelve el número de jugador+cantjugadores o lleno si no puede unirse
+	
+	public String unirJugador(Socket cliente) throws IOException{
 
 		if(numJugador < cantJugadores){
 			numJugador++;
@@ -87,7 +133,7 @@ public class Partida extends Thread{
 	}
 	
 	public void finalizar(){
-		
+		enCurso = false;
 	}
 	
 	public int getCantJugadores(){
@@ -97,10 +143,16 @@ public class Partida extends Thread{
 	public int getNumJugador(){
 		return numJugador;
 	}
-
-	public void salirPartida(Socket cliente) {
-		sockets.remove(cliente);	
-	}
 	
+	public boolean enCurso(){
+		return enCurso;
+	}
+	public void salirPartida(Socket cliente, int numJugador) {
+		sockets.remove(cliente);
+	}
+
+	public int getGanador() {
+		return ganador;
+	}
 	
 }

@@ -17,12 +17,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import servidor.ClienteBomber;
+import cliente.ClienteBomber;
 import servidor.ServidorBomber;
 
-@SuppressWarnings("serial")
 public class Login extends JFrame {
-	public static final String split = "-";
+	private static final long serialVersionUID = 1L;
+	public static final String split = ":";
 	private Fondo contentPane;
 	private JTextField txtUsuario;
 	private JPasswordField txtContrasena;
@@ -97,7 +97,7 @@ public class Login extends JFrame {
 	private boolean conectarServidor() {
 		String login = "validar"+split+txtUsuario.getText()+split+ new String(txtContrasena.getPassword());
 		try {
-			clienteBomber = new ClienteBomber(ServidorBomber.PUERTO, ServidorBomber.IP);
+			clienteBomber = new ClienteBomber();
 			return clienteBomber.validarLogin(login);
 		} catch (Exception e) {
 			System.err.println("Se cerro la conexión");

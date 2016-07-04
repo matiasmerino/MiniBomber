@@ -13,7 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JTextField;
 
-import servidor.ClienteBomber;
+import cliente.ClienteBomber;
 import servidor.ServidorBomber;
 
 @SuppressWarnings("serial")
@@ -36,7 +36,7 @@ public class Registrar extends Fondo {
 		String datos = "regis"+Login.split+txtUsuario.getText()+Login.split+new String(txtNueva.getPassword())+Login.split+
 						txtNick.getText()+Login.split+txtPregunta.getText()+Login.split+txtRespuesta.getText();
 		try {
-			login.clienteBomber = new ClienteBomber(ServidorBomber.PUERTO, ServidorBomber.IP);
+			login.clienteBomber = new ClienteBomber();
 		} catch (Exception e) {
 			System.err.println("Se cerro la conexión");
 		}
